@@ -1,0 +1,33 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "storefront",
+      "runtimeExecutable": "/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin/node",
+      "runtimeArgs": ["/usr/local/bin/pnpm", "--filter", "@repo/storefront", "dev"],
+      "port": 3000,
+      "autoPort": true,
+      "env": {
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin/node",
+      "runtimeArgs": ["/usr/local/bin/pnpm", "--filter", "@repo/admin", "dev"],
+      "port": 5173,
+      "env": {
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin/node",
+      "runtimeArgs": ["/usr/local/bin/pnpm", "--filter", "@repo/api", "dev"],
+      "port": 4000,
+      "env": {
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:/Users/rohanshakya/.nvm/versions/node/v20.15.0/bin:/usr/bin:/bin"
+      }
+    }
+  ]
+}

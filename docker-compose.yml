@@ -1,0 +1,56 @@
+# =============================================================================
+# Handicraft Multivendor Platform — local development infrastructure
+#
+# Runs the supporting services (Postgres, Redis, MailHog) needed for local dev.
+# The apps run on the host via `pnpm dev` for fast HMR + debugger attach.
+#
+# For a fully containerised stack (apps + infra) see docker-compose.prod.yml.
+# =============================================================================
+
+name: handicraft-ecommerce
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: handicraft-ecommerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: handicraft
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d handicraft"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: handicraft-ecommerce-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command: redis-server --appendonly yes
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: handicraft-ecommerce-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI: http://localhost:8025
+
+volumes:
+  postgres_data:
+  redis_data:

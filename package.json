@@ -1,0 +1,49 @@
+{
+  "name": "handicraft-multivendor-platform",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:seed": "pnpm --filter @repo/api db:seed",
+    "db:seed:wipe": "pnpm --filter @repo/api db:seed:wipe",
+    "db:reset": "rm -rf apps/api/drizzle/0*.sql apps/api/drizzle/meta && pnpm db:generate && pnpm db:migrate && pnpm db:seed:wipe",
+    "fresh": "pnpm docker:reset && sleep 5 && pnpm db:reset",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:restart": "docker compose restart",
+    "docker:reset": "docker compose down -v && docker compose up -d",
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "docker:psql": "docker compose exec postgres psql -U postgres -d handicraft",
+    "docker:redis": "docker compose exec redis redis-cli",
+    "docker:prod:up": "docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+    "docker:prod:logs": "docker compose -f docker-compose.prod.yml logs -f",
+    "setup": "cp -n .env.example .env && pnpm install && pnpm docker:up && pnpm db:migrate",
+    "start": "pnpm docker:up && pnpm dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

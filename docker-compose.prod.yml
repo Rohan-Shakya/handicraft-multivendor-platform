@@ -1,0 +1,146 @@
+# =============================================================================
+# Handicraft Multivendor Platform — reference production stack
+#
+# This is a self-contained reference deployment. In a real environment you'd
+# typically run Postgres/Redis as managed services and ship only
+# the app images. Use this for staging, demo deploys, or as a template.
+#
+# Usage:
+#   cp .env.example .env.prod      # set every secret to a real value
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
+# =============================================================================
+
+name: handicraft-ecommerce-prod
+
+x-api-env: &api-env
+  NODE_ENV: production
+  API_PORT: "4000"
+  API_HOST: 0.0.0.0
+  DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/handicraft
+  REDIS_URL: redis://redis:6379
+  JWT_SECRET: ${JWT_SECRET}
+  CSRF_SECRET: ${CSRF_SECRET}
+  WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET}
+  REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+  METRICS_AUTH_TOKEN: ${METRICS_AUTH_TOKEN}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  SENTRY_ENVIRONMENT: production
+  SENTRY_TRACES_SAMPLE_RATE: "0.1"
+  LOG_LEVEL: info
+  STOREFRONT_URL: ${STOREFRONT_URL}
+  NEXT_PUBLIC_STOREFRONT_URL: ${NEXT_PUBLIC_STOREFRONT_URL}
+  VITE_ADMIN_URL: ${VITE_ADMIN_URL}
+  R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+  R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+  R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+  R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+  R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+  SMTP_HOST: ${SMTP_HOST}
+  SMTP_PORT: ${SMTP_PORT}
+  SMTP_USER: ${SMTP_USER}
+  SMTP_PASS: ${SMTP_PASS}
+  SMTP_FROM: ${SMTP_FROM}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  ESEWA_MERCHANT_CODE: ${ESEWA_MERCHANT_CODE:-}
+  ESEWA_SECRET_KEY: ${ESEWA_SECRET_KEY:-}
+  KHALTI_SECRET_KEY: ${KHALTI_SECRET_KEY:-}
+  FONEPAY_MERCHANT_CODE: ${FONEPAY_MERCHANT_CODE:-}
+  FONEPAY_SECRET_KEY: ${FONEPAY_SECRET_KEY:-}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: handicraft
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d handicraft"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api-web:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      PROCESS_MODE: web
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    ports:
+      - "4000:4000"
+    deploy:
+      replicas: 2
+
+  api-worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      PROCESS_MODE: worker
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    deploy:
+      replicas: 1   # MUST stay at 1 — the scheduler is a singleton
+
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_STOREFRONT_URL: ${NEXT_PUBLIC_STOREFRONT_URL}
+        NEXT_PUBLIC_R2_PUBLIC_URL: ${NEXT_PUBLIC_R2_PUBLIC_URL}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+    depends_on:
+      - api-web
+    ports:
+      - "3000:3000"
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_ADMIN_URL: ${VITE_ADMIN_URL}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_ENVIRONMENT: ${VITE_SENTRY_ENVIRONMENT:-production}
+        VITE_SENTRY_TRACES_SAMPLE_RATE: ${VITE_SENTRY_TRACES_SAMPLE_RATE:-0.1}
+        VITE_SENTRY_REPLAYS_SAMPLE_RATE: ${VITE_SENTRY_REPLAYS_SAMPLE_RATE:-0}
+    restart: unless-stopped
+    depends_on:
+      - api-web
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
+  redis_data:
