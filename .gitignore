@@ -37,6 +37,3 @@ Thumbs.db
 # TypeScript incremental build cache
 *.tsbuildinfo
 
-# Drizzle — track the folder, ignore generated files
-apps/api/drizzle/meta
-apps/api/drizzle/*.sql
