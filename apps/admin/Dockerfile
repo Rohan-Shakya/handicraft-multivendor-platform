@@ -13,6 +13,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 WORKDIR /repo
 COPY --from=installer /repo ./
+COPY tsconfig.json ./tsconfig.json
 COPY packages    ./packages
 COPY apps/admin  ./apps/admin
 ARG VITE_API_URL
@@ -27,7 +28,9 @@ ENV VITE_API_URL=$VITE_API_URL \
     VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT \
     VITE_SENTRY_TRACES_SAMPLE_RATE=$VITE_SENTRY_TRACES_SAMPLE_RATE \
     VITE_SENTRY_REPLAYS_SAMPLE_RATE=$VITE_SENTRY_REPLAYS_SAMPLE_RATE
-RUN pnpm --filter @repo/admin build
+RUN pnpm --filter @repo/types build \
+ && pnpm --filter @repo/config build \
+ && pnpm --filter @repo/admin build
 
 FROM nginx:1.27-alpine AS runner
 RUN apk add --no-cache wget

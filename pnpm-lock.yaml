@@ -417,9 +417,17 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
-  packages/config: {}
+  packages/config:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
 packages:
 

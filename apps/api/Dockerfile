@@ -16,7 +16,9 @@ COPY --from=installer /repo ./
 COPY tsconfig.json ./tsconfig.json
 COPY packages   ./packages
 COPY apps/api   ./apps/api
-RUN pnpm --filter @repo/api build \
+RUN pnpm --filter @repo/types build \
+ && pnpm --filter @repo/config build \
+ && pnpm --filter @repo/api build \
  && find /repo/apps/api/dist -name '*.map' -delete
 
 FROM base AS deployer

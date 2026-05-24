@@ -13,6 +13,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 WORKDIR /repo
 COPY --from=installer /repo ./
+COPY tsconfig.json     ./tsconfig.json
 COPY packages          ./packages
 COPY apps/storefront   ./apps/storefront
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -22,7 +23,9 @@ ARG NEXT_PUBLIC_R2_PUBLIC_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_STOREFRONT_URL=$NEXT_PUBLIC_STOREFRONT_URL \
     NEXT_PUBLIC_R2_PUBLIC_URL=$NEXT_PUBLIC_R2_PUBLIC_URL
-RUN pnpm --filter @repo/storefront build
+RUN pnpm --filter @repo/types build \
+ && pnpm --filter @repo/config build \
+ && pnpm --filter @repo/storefront build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
