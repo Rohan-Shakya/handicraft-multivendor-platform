@@ -87,8 +87,8 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       redis:    { condition: service_healthy }
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     deploy:
       replicas: 2
 
@@ -121,8 +121,8 @@ services:
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       - api-web
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
 
   admin:
     build:
@@ -138,8 +138,8 @@ services:
     restart: unless-stopped
     depends_on:
       - api-web
-    ports:
-      - "5173:80"
+    expose:
+      - "80"
 
 volumes:
   postgres_data:
