@@ -237,6 +237,9 @@ importers:
       bullmq:
         specifier: ^5.34.0
         version: 5.73.5
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
       drizzle-orm:
         specifier: ^0.38.4
         version: 0.38.4(@types/react@19.2.14)(kysely@0.28.17)(postgres@3.4.8)(react@19.2.4)
@@ -277,9 +280,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.1.9
         version: 2.1.9(vitest@2.1.9(@types/node@22.19.15)(jsdom@29.1.1(@noble/hashes@2.0.1))(lightningcss@1.31.1))
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
       drizzle-kit:
         specifier: ^0.30.4
         version: 0.30.6
