@@ -43,3 +43,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/index.js"]
+# cache-bust 1779619407
