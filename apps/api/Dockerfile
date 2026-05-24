@@ -13,6 +13,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 WORKDIR /repo
 COPY --from=installer /repo ./
+COPY tsconfig.json ./tsconfig.json
 COPY packages   ./packages
 COPY apps/api   ./apps/api
 RUN pnpm --filter @repo/api build \
